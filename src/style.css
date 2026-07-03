@@ -1,0 +1,83 @@
+:root{
+  --gold:#d9b45c; --gold-dim:#9a7d3a; --ink:#f3e9d2;
+  --felt:#0d3b2e; --bad:#c0392b;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:#071f18;
+  font-family:"Noto Serif TC","PMingLiU","Songti TC",serif;color:var(--ink);}
+#scene{position:fixed;inset:0;cursor:grab;touch-action:none;}
+#scene.dragging{cursor:grabbing;}
+
+/* ── 卡片式標題牌 ── */
+#plaque{
+  position:fixed;top:14px;left:50%;transform:translateX(-50%);
+  text-align:center;pointer-events:none;user-select:none;
+  padding:10px 26px 12px;
+  border:1px solid rgba(217,180,92,.55);
+  border-radius:4px;
+  background:linear-gradient(180deg,rgba(10,30,24,.85),rgba(7,22,17,.85));
+  box-shadow:0 0 0 3px rgba(7,22,17,.6),0 6px 24px rgba(0,0,0,.5);
+}
+#plaque .no{font-size:11px;letter-spacing:.45em;color:var(--gold-dim);}
+#plaque h1{font-size:22px;letter-spacing:.3em;color:var(--gold);font-weight:700;margin:2px 0 1px;text-indent:.3em;}
+#plaque .sub{font-size:11px;letter-spacing:.2em;color:rgba(243,233,210,.55);}
+
+/* ── 操作提示 ── */
+#hint{
+  position:fixed;bottom:96px;left:50%;transform:translateX(-50%);
+  font-size:13px;letter-spacing:.25em;color:rgba(243,233,210,.6);
+  pointer-events:none;user-select:none;transition:opacity .6s;text-indent:.25em;text-align:center;
+}
+#hint.hide{opacity:0;}
+
+/* ── 底部控制列 ── */
+#bar{
+  position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
+  display:flex;gap:14px;align-items:center;
+}
+button{
+  font-family:inherit;font-size:15px;letter-spacing:.35em;text-indent:.35em;
+  color:var(--gold);background:rgba(10,30,24,.8);
+  border:1px solid rgba(217,180,92,.6);border-radius:3px;
+  padding:10px 22px;cursor:pointer;transition:.2s;
+}
+button:hover{background:rgba(217,180,92,.15);box-shadow:0 0 18px rgba(217,180,92,.25);}
+button:active{transform:scale(.96);}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+/* ── 計數器 ── */
+#tally{
+  position:fixed;top:16px;right:16px;font-size:13px;line-height:1.9;
+  letter-spacing:.15em;text-align:right;user-select:none;
+  color:rgba(243,233,210,.75);
+}
+#tally b{font-size:17px;}
+#tally .g b{color:var(--gold);}
+#tally .b b{color:#e06050;}
+
+/* ── 結果橫幅 ── */
+#banner{
+  position:fixed;top:38%;left:50%;transform:translate(-50%,-50%) scale(.6);
+  font-size:min(18vw,110px);font-weight:900;letter-spacing:.15em;text-indent:.15em;
+  opacity:0;pointer-events:none;user-select:none;white-space:nowrap;
+  transition:opacity .25s, transform .45s cubic-bezier(.2,1.6,.4,1);
+}
+#banner.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+#banner.good{color:var(--gold);text-shadow:0 0 30px rgba(255,215,120,.9),0 0 90px rgba(255,190,60,.5);}
+#banner.mid{color:#e8d9a0;text-shadow:0 0 26px rgba(232,217,160,.85),0 0 70px rgba(210,190,120,.4);}
+#banner.small{color:#cfe3d5;text-shadow:0 0 22px rgba(207,227,213,.75),0 0 60px rgba(160,200,175,.35);}
+#banner.bad{color:var(--bad);text-shadow:0 0 30px rgba(255,60,40,.9),0 0 90px rgba(160,0,0,.6);}
+
+/* ── 凶：全螢幕紅閃 ── */
+#flash{position:fixed;inset:0;background:radial-gradient(circle,rgba(140,0,0,.55),rgba(60,0,0,.85));
+  opacity:0;pointer-events:none;transition:opacity .25s;}
+#flash.on{opacity:1;}
+
+@media (prefers-reduced-motion: reduce){
+  #banner{transition:opacity .2s;}
+}
+@media (max-width:480px){
+  #plaque h1{font-size:17px;}
+  button{font-size:13px;padding:9px 16px;}
+  #hint{bottom:88px;font-size:12px;}
+}
