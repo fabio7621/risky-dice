@@ -572,6 +572,7 @@ const HOLD_Y = 2.1;                                        // 抓著時的懸浮
 const holdPlane = new THREE.Plane(new V3(0,1,0), -HOLD_Y); // 平面 y = HOLD_Y
 let held = false;
 const holdTarget = new V3();
+const prevHold = new V3(), _spin = new V3();   // 上一幀手的位置、目標角速度
 let samples = [];                                          // 世界座標位置取樣（算甩出速度用）
 const _hp = new V3(), _mv = new V3(), _hq = new Q4();
 
@@ -590,6 +591,7 @@ container.addEventListener('pointerdown', e=>{
   container.classList.add('dragging');
   container.setPointerCapture(e.pointerId);
   holdTarget.copy(body.pos); holdTarget.y = HOLD_Y;
+  prevHold.copy(holdTarget);
   samples = [{p: body.pos.clone(), t: performance.now()}];
   hint.classList.add('hide');
   banner.classList.remove('show');
@@ -646,9 +648,13 @@ function animate(){
   if(held && dt > 0){
     _hp.copy(body.pos);
     body.pos.lerp(holdTarget, 1 - Math.pow(.0005, dt));    // 幀率無關的平滑跟隨
-    _mv.subVectors(body.pos, _hp);
-    body.omega.set(_mv.z, 0, -_mv.x).multiplyScalar(.9/Math.max(dt,.001));
-    if(body.omega.length() > 7) body.omega.setLength(7);
+    // 用「手的實際移動量」驅動旋轉（未平滑）：左右快速晃動也轉得起來
+    _mv.subVectors(holdTarget, prevHold);
+    prevHold.copy(holdTarget);
+    _spin.set(_mv.z, -_mv.x*.7, -_mv.x)                    // 滾轉 + 左右晃動的扭轉
+         .multiplyScalar(1.5/Math.max(dt,.001));
+    if(_spin.length() > 16) _spin.setLength(16);
+    body.omega.lerp(_spin, 1 - Math.pow(.002, dt));        // 平滑趨近，停手時自然停轉
     _hq.set(body.omega.x, body.omega.y, body.omega.z, 0).multiply(body.quat);
     body.quat.x += _hq.x*.5*dt; body.quat.y += _hq.y*.5*dt;
     body.quat.z += _hq.z*.5*dt; body.quat.w += _hq.w*.5*dt;
