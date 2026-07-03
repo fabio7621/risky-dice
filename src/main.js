@@ -10,6 +10,7 @@ import { feltTexture } from './textures.js';
 import { createDice } from './dice.js';
 import { createPhysics } from './physics.js';
 import { makeParticles, emit, updateParticles } from './particles.js';
+import { initShake } from './shake.js';
 
 const V3 = THREE.Vector3, Q4 = THREE.Quaternion;
 const UP = new V3(0,1,0);
@@ -164,9 +165,10 @@ function throwDice(vx, vy, vz){
   audio();
 }
 
-// 按鈕擲骰：從骰子最後停留的位置「拿起來」再擲，不瞬移
+// 按鈕／搖晃擲骰：從骰子最後停留的位置「拿起來」再擲，不瞬移
+// power 0~1：額外力道（搖晃越大力擲越猛）
 let pickup = null;
-document.getElementById('rollBtn').addEventListener('click', ()=>{
+function pickupAndThrow(power = 0){
   if(held || pickup) return;
   phys.sleeping = true; snapping = null; phys.settleTimer = 0;
   hint.classList.add('hide');
@@ -175,17 +177,19 @@ document.getElementById('rollBtn').addEventListener('click', ()=>{
   pickup = {
     from: body.pos.clone(),
     to: new V3(body.pos.x*.6, HOLD_Y + .5, body.pos.z*.6),
-    t: 0
+    t: 0, power
   };
   audio();
-});
+}
+document.getElementById('rollBtn').addEventListener('click', ()=>pickupAndThrow());
 function finishPickup(){
+  const power = pickup.power;
   pickup = null;
-  const a = Math.random()*Math.PI*2, s = 3+Math.random()*3;
+  const a = Math.random()*Math.PI*2, s = 3+Math.random()*3 + power*4;
   // 出手方向帶一點往桌面中央的偏移，避免直接撞上圍欄
   const vx = Math.cos(a)*s - body.pos.x*.7;
   const vz = Math.sin(a)*s*.7 - body.pos.z*.7;
-  throwDice(vx, 2+Math.random()*2, vz);
+  throwDice(vx, 2+Math.random()*2 + power*1.5, vz);
 }
 document.getElementById('resetBtn').addEventListener('click', ()=>{
   phys.sleeping = true; snapping = null; pickup = null;
@@ -263,6 +267,11 @@ function releaseDice(){
 }
 container.addEventListener('pointerup', releaseDice);
 container.addEventListener('pointercancel', releaseDice);
+
+/* ---------- 搖晃手機擲骰 ---------- */
+if(initShake(power=>pickupAndThrow(power)) && matchMedia('(pointer: coarse)').matches){
+  hint.textContent = '抓住骰子甩動放開、搖晃手機，或按下方「擲骰」';
+}
 
 /* ---------- 主迴圈 ---------- */
 const clock = new THREE.Clock();
