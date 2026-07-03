@@ -269,7 +269,11 @@ container.addEventListener('pointerup', releaseDice);
 container.addEventListener('pointercancel', releaseDice);
 
 /* ---------- 搖晃手機擲骰 ---------- */
-if(initShake(power=>pickupAndThrow(power)) && matchMedia('(pointer: coarse)').matches){
+const shakeReady = initShake(
+  power=>pickupAndThrow(power),
+  ()=>{ hint.textContent = '已拒絕動作感應權限，搖晃擲骰停用'; hint.classList.remove('hide'); }
+);
+if(shakeReady && matchMedia('(pointer: coarse)').matches){
   hint.textContent = '抓住骰子甩動放開、搖晃手機，或按下方「擲骰」';
 }
 
